@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`KingBeeTPL-element`
+
+
+@demo demo/index.html 
+-->
+
+<dom-module id="KingBeeTPL-element">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'KingBeeTPL-element',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'KingBeeTPL-element',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
