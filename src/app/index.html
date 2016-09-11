@@ -247,7 +247,7 @@
 				self.customStyle["--app-show-paper-progress"] = "block";
 				self.updateStyles();
 
-				self.importHref(resolvedPageUrl, () => {
+				self.importHref(resolvedPageUrl, function() {
 					self.customStyle["--app-show-paper-progress"] = "none";
 					self.updateStyles();
 					// 渲染进程ID
@@ -284,9 +284,9 @@
 						$iron_pages.items.forEach(function(n) {
 							n._current_ani && n._current_ani.cancel();
 							n._current_ani = n.animate([{
-								transform: `translateX(${-$pre_selected_item.offsetLeft}px) translateZ(0)`
+								transform: "translateX("+ (-$pre_selected_item.offsetLeft)+"px) translateZ(0)"
 							}, {
-								transform: `translateX(${-$selected_item.offsetLeft}px) translateZ(0)`
+								transform: "translateX("+ (-$selected_item.offsetLeft)+"px) translateZ(0)"
 							}], {
 								duration: duration,
 								iterations: 1,

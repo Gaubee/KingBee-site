@@ -87,27 +87,27 @@
 			__get_ani_config:function () {
 				const scale = (500 + 200) / 500;
 				const show_to_hide = [{
-					transform: `translateZ(-200px) rotate${this._axis}(0deg) scale(${scale})`
+					transform: "translateZ(-200px) rotate"+this._axis+"(0deg) scale("+scale+")"
 				}, {
-					transform: `translateZ(-100px) rotate${this._axis}(0deg) scale(${scale})`,
+					transform: "translateZ(-100px) rotate"+this._axis+"(0deg) scale("+scale+")",
 					offset: 0.15
 				}, {
-					transform: `translateZ(-100px) rotate${this._axis}(180deg) scale(${scale})`,
+					transform: "translateZ(-100px) rotate"+this._axis+"(180deg) scale("+scale+")",
 					offset: 0.65
 				}, {
-					transform: `translateZ(-200px) rotate${this._axis}(180deg) scale(${scale})`
+					transform: "translateZ(-200px) rotate"+this._axis+"(180deg) scale("+scale+")"
 				}];
 
 				const hide_to_show = [{
-					transform: `translateZ(-200px) rotate${this._axis}(180deg) scale(${scale})`
+					transform: "translateZ(-200px) rotate"+this._axis+"(180deg) scale("+scale+")"
 				}, {
-					transform: `translateZ(-100px) rotate${this._axis}(180deg) scale(${scale})`,
+					transform: "translateZ(-100px) rotate"+this._axis+"(180deg) scale("+scale+")",
 					offset: 0.15
 				}, {
-					transform: `translateZ(-100px) rotate${this._axis}(360deg) scale(${scale})`,
+					transform: "translateZ(-100px) rotate"+this._axis+"(360deg) scale("+scale+")",
 					offset: 0.65
 				}, {
-					transform: `translateZ(-200px) rotate${this._axis}(360deg) scale(${scale})`
+					transform: "translateZ(-200px) rotate"+this._axis+"(360deg) scale("+scale+")"
 				}];
 				var timing  = {
 					duration: this._duration,
@@ -226,6 +226,7 @@
 			},
 
 			_pageChanged: function(page) {
+				var self = this;
 				var page_url = {
 					"view404": "../kb-view404",
 					"login": "login",
@@ -233,13 +234,13 @@
 					"findpwd": "findpwd",
 				}[page];
 				// Load page import on demand. Show 404 page if fails
-				var resolvedPageUrl = this.resolveUrl(page_url + '.html');
-				this.customStyle["--account-show-paper-progress"] = "block";
-				this.updateStyles();
-				this.importHref(resolvedPageUrl, () => {
-					this.customStyle["--account-show-paper-progress"] = "none";
-					this.updateStyles();
-				}, this._showPage404, true);
+				var resolvedPageUrl = self.resolveUrl(page_url + '.html');
+				self.customStyle["--account-show-paper-progress"] = "block";
+				self.updateStyles();
+				self.importHref(resolvedPageUrl, function() {
+					self.customStyle["--account-show-paper-progress"] = "none";
+					self.updateStyles();
+				}, self._showPage404, true);
 			},
 
 			_showPage404: function() {
