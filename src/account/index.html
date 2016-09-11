@@ -1,0 +1,250 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/app-route/app-route.html">
+<link rel="import" href="/bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="/bower_components/paper-progress/paper-progress.html">
+<dom-module id="kb-account">
+	<style >
+		:host{
+			display: flex;
+			align-items: center;
+			justify-content:center;
+			--account-show-paper-progress:none;
+			/*底部预留空间，来避免toast的显示遮掩了太多东西*/
+			height: 92vh;
+		}
+		.bg{
+			background-color: #00acbd;
+		}
+		iron-pages{
+			width: 80vw;
+			max-width: 800pt;
+		}
+		@media (max-width: 600px){
+			:host{
+				height: initial;
+			}
+			iron-pages{
+				width: 100vw;
+			}
+			paper-progress{
+				width: 100%;
+			}
+		}
+		paper-progress{
+			display: var(--account-show-paper-progress);
+			position: absolute;
+		}
+		iron-pages{
+			perspective: 500px;
+			-webkit-perspective: 500px;
+		}
+		iron-pages > *{
+			perspective: 500px;
+			-webkit-perspective: 500px;
+			will-change: transform;
+			backface-visibility: hidden;
+		}
+	</style>
+	<template>
+		<app-route
+			route="{{route}}"
+			pattern="/:page"
+			data="{{routeData}}"></app-route>
+		<paper-progress indeterminate></paper-progress>
+		<iron-pages
+			selected="[[page]]"
+			attr-for-selected="name">
+			<kb-account-login name="login"></kb-account-login>
+			<kb-account-register name="register"></kb-account-register>
+			<kb-account-findpwd name="findpwd"></kb-account-findpwd>
+		</iron-pages>
+	</template>
+	<script>
+		Polymer({
+			is: "kb-account",
+			properties: {
+				page: {
+					type: String,
+					reflectToAttribute: true,
+					observer: '_pageChanged'
+				},
+			},
+
+			// attachedCallback:function () {
+			// 	console.log("attachedCallback");
+			// },
+			// detachedCallback:function () {
+			// 	console.log("detachedCallback");
+			// },
+			_axis:"Y",
+			_duration:800,
+			_show_page:function (page) {
+				page.classList.add("iron-selected");
+			},
+			_hide_page:function (page) {
+				page.classList.remove("iron-selected");
+			},
+			__get_ani_config:function () {
+				const scale = (500 + 200) / 500;
+				const show_to_hide = [{
+					transform: `translateZ(-200px) rotate${this._axis}(0deg) scale(${scale})`
+				}, {
+					transform: `translateZ(-100px) rotate${this._axis}(0deg) scale(${scale})`,
+					offset: 0.15
+				}, {
+					transform: `translateZ(-100px) rotate${this._axis}(180deg) scale(${scale})`,
+					offset: 0.65
+				}, {
+					transform: `translateZ(-200px) rotate${this._axis}(180deg) scale(${scale})`
+				}];
+
+				const hide_to_show = [{
+					transform: `translateZ(-200px) rotate${this._axis}(180deg) scale(${scale})`
+				}, {
+					transform: `translateZ(-100px) rotate${this._axis}(180deg) scale(${scale})`,
+					offset: 0.15
+				}, {
+					transform: `translateZ(-100px) rotate${this._axis}(360deg) scale(${scale})`,
+					offset: 0.65
+				}, {
+					transform: `translateZ(-200px) rotate${this._axis}(360deg) scale(${scale})`
+				}];
+				var timing  = {
+					duration: this._duration,
+					iterations: 1,
+					easing: 'ease-in-out',
+					// fill: 'forwards'
+				}
+				return {
+					hide: show_to_hide,
+					show: hide_to_show,
+					timing: timing
+				}
+			},
+			_ani_end_page: function($end_page, $new_page, cb) {
+				var self = this;
+				self._show_page($end_page);
+				$new_page && self._hide_page($new_page);
+				var ani_config = self.__get_ani_config();
+
+				var ani = $end_page.animate(ani_config.hide, ani_config.timing);
+				//进入隐藏状态
+				setTimeout (function () {
+					self._hide_page($end_page);
+				},0.4 * ani_config.timing.duration) 
+
+				// if ($end_page.clientWidth * $end_page.clientHeight) {
+				// 	var bak_cssText = $end_page.style.cssText;
+				// 	$end_page.style.width = $end_page.clientWidth + "px";
+				// 	$end_page.style.height = $end_page.clientHeight + "px";
+				// 	$end_page.style.top = $end_page.offsetTop + "px";
+				// 	$end_page.style.left = $end_page.offsetLeft + "px";
+				// 	$end_page.style.position = "absolute";
+				// 	ani.addEventListener("finish", function() {
+				// 		$end_page.style.cssText = bak_cssText;
+				// 	});
+				// }
+
+				ani.onfinish = function(e) {
+					self._hide_page($end_page);
+					$new_page && self._show_page($new_page);
+					cb && cb.call(this, e);
+				};
+			},
+			_ani_new_page:function ($new_page, $end_page, cb) {
+				var self = this;
+				// self._show_page($new_page);
+				self._hide_page($new_page);
+				$end_page && self._hide_page($end_page);
+				var ani_config = self.__get_ani_config();
+
+				//进入显示状态
+				setTimeout (function () {
+					self._show_page($new_page);
+				},0.4 * ani_config.timing.duration) 
+
+				var ani = $new_page.animate(ani_config.show,ani_config.timing)
+
+				// if ($new_page.clientWidth * $new_page.clientHeight) {
+				// 	var bak_cssText = $new_page.style.cssText;
+				// 	$new_page.style.width = $new_page.clientWidth+"px";
+				// 	$new_page.style.height = $new_page.clientHeight+"px";
+				// 	$new_page.style.top = $new_page.offsetTop+"px";
+				// 	$new_page.style.left = $new_page.offsetLeft+"px";
+				// 	$new_page.style.position = "absolute";
+				// 	ani.addEventListener("finish",function () {
+				// 		$new_page.style.cssText = bak_cssText;
+				// 	});
+				// }
+
+				ani.onfinish = cb;
+			},
+			_ani_pages:function ($new_page, $old_page, is_delay, cb) {
+				var self = this;
+				if (is_delay) {
+					if ($old_page) {
+						if (isFinite(is_delay)) {
+							self._ani_end_page($old_page, $new_page);
+							$new_page && setTimeout(self._ani_new_page($new_page,null,cb), is_delay);
+						} else {
+							self._ani_end_page($old_page, $new_page, function() {
+								$new_page && self._ani_new_page($new_page,null,cb);
+							});
+						}
+					} else if ($new_page) {
+						self._ani_new_page($new_page,null,cb);
+					}
+				}else{
+					if ($old_page) {
+						self._ani_end_page($old_page, $new_page);
+					}
+					self._ani_new_page($new_page, null, cb);
+				}
+			},
+			attributeChangedCallback: function(key_name, old_value, new_value) {
+				if (key_name!=="page") {
+					return false;
+				}
+				var self = this;
+				var $iron_pages = self.$$("iron-pages");
+				if (old_value) {
+					var $old_page = $iron_pages.querySelector("[name="+old_value+"]") 
+				}
+				if (new_value) {
+					var $new_page = $iron_pages.querySelector("[name="+new_value+"]") 
+				}
+
+				self._ani_pages($new_page,$old_page);
+			},
+
+			observers: [
+				'_routePageChanged(routeData.page)'
+			],
+
+			_routePageChanged: function(page) {
+				this.page = page || 'login';
+			},
+
+			_pageChanged: function(page) {
+				var page_url = {
+					"view404": "../kb-view404",
+					"login": "login",
+					"register": "register",
+					"findpwd": "findpwd",
+				}[page];
+				// Load page import on demand. Show 404 page if fails
+				var resolvedPageUrl = this.resolveUrl(page_url + '.html');
+				this.customStyle["--account-show-paper-progress"] = "block";
+				this.updateStyles();
+				this.importHref(resolvedPageUrl, () => {
+					this.customStyle["--account-show-paper-progress"] = "none";
+					this.updateStyles();
+				}, this._showPage404, true);
+			},
+
+			_showPage404: function() {
+				this.page = 'view404';
+			}
+		});
+	</script>
+</dom-module>

@@ -45,7 +45,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="msapplication-TileImage" content="/images/manifest/icon-144x144.png">
     <meta name="msapplication-TileColor" content="#3f51b5">
     <meta name="msapplication-tap-highlight" content="no">
-
     <script>
       // Setup Polymer options
       window.Polymer = {
@@ -92,20 +91,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </script>
 
-    <link rel="import" href="/src/my-app.html">
+    <link rel="import" href="/src/index.html">
 
     <style>
       body {
         margin: 0;
-        font-family: 'Roboto', 'Noto', sans-serif;
+        font-family: 'Noto Sans CJK SC', 'Roboto', 'Noto', sans-serif;
         line-height: 1.5;
         min-height: 100vh;
         background-color: #eeeeee;
       }
+      *{
+        font-family: 'Noto Sans CJK SC', 'Roboto', 'Noto', sans-serif!important;
+      }
     </style>
   </head>
   <body>
-    <my-app></my-app>
+    <kb-index id="app_node"></kb-index>
     <!-- Built with love using Polymer Starter Kit -->
   </body>
 </html>
