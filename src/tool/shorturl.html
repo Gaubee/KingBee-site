@@ -110,7 +110,13 @@
 					name: "weixin",
 					title: "基于微信API的短域名服务",
 					handle: function(long_url, cb, onprogress) {
-						var api_url = "http://www.youdob.com/short.php?url=" + decodeURIComponent(long_url);
+						if (location.protocol === "https:") {
+							var base_url = "/proxy/short.php?url=";
+						} else {
+							base_url = "http://www.youdob.com/proxy_able/short.php?url=";
+						}
+						var api_url = base_url + decodeURIComponent(long_url);
+
 						var xhr = new XMLHttpRequest;
 						xhr.open("get", api_url);
 						xhr.send();
