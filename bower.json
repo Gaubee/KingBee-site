@@ -30,7 +30,12 @@
     "paper-item": "PolymerElements/paper-item#^1.2.1",
     "paper-styles": "PolymerElements/paper-styles#^1.1.4",
     "neon-animation": "PolymerElements/neon-animation#^1.2.4",
-    "paper-dialog": "^1.1.0"
+    "paper-dialog": "^1.1.0",
+    "paper-dropdown-menu": "^1.4.0",
+    "jquery-qrcode": "jquery.qrcode#^0.14.0",
+    "jquery": "^3.1.0",
+    "paper-listbox": "^1.1.2",
+    "paper-swatch-picker": "^1.0.2"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

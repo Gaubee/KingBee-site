@@ -1,0 +1,374 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/paper-card/paper-card.html">
+<link rel="import" href="/bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/paper-input/paper-textarea.html">
+
+<link rel="import" href="/bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="/bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="/bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="/bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="/bower_components/iron-icons/image-icons.html">
+<link rel="import" href="/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="/bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/bower_components/paper-swatch-picker/paper-swatch-picker.html">
+<link rel="import" href="/bower_components/paper-ripple/paper-ripple.html">
+
+<script src="/bower_components/jquery/dist/jquery.slim.min.js"></script>
+<script src="/bower_components/jquery-qrcode/dist/jquery-qrcode.min.js"></script>
+
+<dom-module id="kb-tool-qrcode">
+<style>
+	:host{
+	};
+	.app-container{
+		/*padding:1vw 0 0 1vw;*/
+		padding-left: 1%;
+		padding-top: 1%;
+		display: flex;
+		flex-wrap: wrap;
+		width: 100%;
+		box-sizing: border-box;
+	}
+	#qrcode-config{
+		width: 50%;
+	}
+	#qrcode-config .card-content{
+		padding-left: 2%;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	#qrcode-config paper-dropdown-menu,#qrcode-config paper-input,#qrcode-config polymer-color-picker{
+		width: 47.5%;
+		margin-right: 2%;
+		display: inline-block;
+	}
+	#qrcode-view{
+		width: 50%;
+	}
+	#qrcode_canves{
+		text-align: center;
+		background-color: #ddd;
+	}
+	paper-input paper-swatch-picker{
+		width: 24px;
+		height: 24px;
+		position: relative;
+		top: -24px;
+		left: -24px;
+	}
+	paper-input .paper-swatch-picker-bg{
+		width: 40px;
+		height: 40px;
+		position: absolute;
+		right: 0;
+		bottom: 0;
+	}
+	paper-input .paper-swatch-picker-bg.light{
+		background-color: #FFF
+	}
+	paper-input .paper-swatch-picker-bg.dark{
+		background-color: #000
+	}
+	paper-input .select-image{
+		position: relative;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		cursor: pointer;
+	}
+	paper-input .select-image iron-icon{
+		position: absolute;
+		top: 0;
+		left: 0;
+		font-size: 24px;
+		width: 24px;
+		height: 24px;
+		padding: 8px;
+	}
+	paper-input .select-image .select-image-mask{
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+	}
+</style>
+	<template>
+	<div class="app-container">
+		<paper-card id="qrcode-config" heading="参数配置">
+			<div class="card-content">
+				<paper-dropdown-menu label="minVersion">
+					<paper-listbox class="dropdown-content" selected="{{qrcode_config.minVersion}}" attr-for-selected="name">
+						<template is="dom-repeat" items="{{_getSelectAbleRange(1, qrcode_config.maxVersion, 0)}}">
+							<paper-item name=[[item]]>[[item]]</paper-item>
+						</template>
+					</paper-listbox>
+				</paper-dropdown-menu>
+				<paper-dropdown-menu label="maxVersion">
+					<paper-listbox class="dropdown-content" selected="{{qrcode_config.maxVersion}}" attr-for-selected="name">
+						<template is="dom-repeat" items="{{_getSelectAbleRange(qrcode_config.minVersion, 40, 1)}}">
+							<paper-item name=[[item]]>[[item]]</paper-item>
+						</template>
+					</paper-listbox>
+				</paper-dropdown-menu>
+				<paper-dropdown-menu label="ecLevel">
+					<paper-listbox class="dropdown-content" selected="{{qrcode_config.ecLevel}}" attr-for-selected="name">
+						<paper-item name="L">低</paper-item>
+						<paper-item name="M">中</paper-item>
+						<paper-item name="Q">高</paper-item>
+						<paper-item name="H">极高</paper-item>
+					</paper-listbox>
+				</paper-dropdown-menu>
+				<paper-input type="number" label="left" value="{{qrcode_config.left::input}}"></paper-input>
+				<paper-input type="number" label="top" value="{{qrcode_config.top::input}}"></paper-input>
+				<paper-input type="number" label="size" value="{{qrcode_config.size::input}}"></paper-input>
+				<paper-input label="fill" value="{{qrcode_config.fill::input}}">
+					<template is="dom-if" if="{{!qrcode_config.fill}}">
+						<span prefix>#RGB:　</span>
+					</template>
+					<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fill)}}" suffix></div>
+					<paper-swatch-picker suffix color="{{qrcode_config.fill}}"></paper-swatch-picker>
+				</paper-input>
+				<paper-input label="background" value="{{qrcode_config.background::input}}">
+					<template is="dom-if" if="{{!qrcode_config.background}}">
+						<span prefix>#RGB:　</span>
+					</template>
+					<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.background)}}" suffix></div>
+					<paper-swatch-picker suffix color="{{qrcode_config.background}}"></paper-swatch-picker>
+				</paper-input>
+				<paper-input label="text" value="{{qrcode_config.text::input}}"></paper-input>
+				<paper-input type="number" label="radius" min="0" max="0.5" step="0.02" value="{{qrcode_config.radius::input}}"></paper-input>
+				<paper-input type="number" label="quiet" value="{{qrcode_config.quiet::input}}"></paper-input>
+				<!-- <paper-input type="number" label="mode" value="{{qrcode_config.mode::input}}"></paper-input> -->
+				<paper-dropdown-menu label="mode" vertical-align="bottom" >
+					<paper-listbox class="dropdown-content" selected="{{qrcode_config.mode}}" attr-for-selected="name">
+						<paper-item name="0">normal</paper-item>
+						<paper-item name="1">label strip</paper-item>
+						<paper-item name="2">label box</paper-item>
+						<paper-item name="3">image strip</paper-item>
+						<paper-item name="4">image box</paper-item>
+					</paper-listbox>
+				</paper-dropdown-menu>
+				<template is="dom-if" if="{{_isShowImageConfig(qrcode_config.mode)}}">
+					<paper-input type="number" label="mSize" step="0.05" value="{{qrcode_config.mSize::input}}"></paper-input>
+					<paper-input type="number" label="mPosX" step="0.01" value="{{qrcode_config.mPosX::input}}"></paper-input>
+					<paper-input type="number" label="mPosY" step="0.01" value="{{qrcode_config.mPosY::input}}"></paper-input>
+					<paper-input label="image"  value="{{qrcode_config.image::change}}">
+						<div suffix class="select-image">
+							<iron-icon icon="image:photo">
+							</iron-icon>
+							<paper-ripple>
+							</paper-ripple>
+							<input class="select-image-mask" type="file" on-change="_selectImageFile">
+						</div>
+					</paper-input>
+				</template>
+				<template is="dom-if" if="{{_isShowLabelConfig(qrcode_config.mode)}}">
+					<paper-input label="label" value="{{qrcode_config.label::input}}"></paper-input>
+					<paper-input label="fontcolor" value="{{qrcode_config.fontcolor::input}}">
+						<template is="dom-if" if="{{!qrcode_config.fontcolor}}">
+							<span prefix>#RGB:　</span>
+						</template>
+						<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fontcolor)}}" suffix></div>
+						<paper-swatch-picker suffix color="{{qrcode_config.fontcolor}}"></paper-swatch-picker>
+					</paper-input>
+				</template>
+			</div>
+		</paper-card>
+		<paper-card id="qrcode-view" heading="实时效果">
+			<div id="qrcode_canves" class="card-content">
+				
+			</div>
+		</paper-card>
+	</div>
+	</template>
+	<script>
+Polymer({
+	is: 'kb-tool-qrcode',
+	properties: {
+		"toast_opened": {
+			type: Array,
+			value: []
+		},
+		"qrcode_config":{
+			type:Object,
+			value: {
+				// render method: 'canvas', 'image' or 'div'
+				render: 'canvas',
+
+				// version range somewhere in 1 .. 40
+				minVersion: 1,
+				maxVersion: 40,
+
+				// error correction level: 'L', 'M', 'Q' or 'H'
+				ecLevel: 'L',
+
+				// offset in pixel if drawn onto existing canvas
+				left: 0,
+				top: 0,
+
+				// size in pixel
+				size: 200,
+
+				// code color or image element
+				fill: '#000',
+
+				// background color or image element, null for transparent background
+				background: null,
+
+				// content
+				text: 'no text',
+
+				// corner radius relative to module width: 0.0 .. 0.5
+				radius: 0,
+
+				// quiet zone in modules
+				quiet: 0,
+
+				// modes
+				// 0: normal
+				// 1: label strip
+				// 2: label box
+				// 3: image strip
+				// 4: image box
+				mode: 0,
+
+				mSize: 0.1,
+				mPosX: 0.5,
+				mPosY: 0.5,
+
+				label: 'no label',
+				fontname: 'sans',
+				fontcolor: '#000',
+
+				image: null
+			},
+		}
+	},
+	observers:["updateQrCode(qrcode_config.*)"],
+	_getSelectAbleRange:function (min, max,is_containe_large) {
+		var res = [];
+		do{
+			res.push(min);
+			min+=1;
+		}while(min<max);
+		if (is_containe_large) {
+			res.shift();
+			res.push(max);
+		}
+		return res;
+	},
+	_DarkOrLight:function (color) {
+		var is_dark = true;
+		if (typeof color === "string" && color.indexOf("#") === 0) {
+			if (color.length < 7) {
+				var r = color.charAt(1);
+				var g = color.charAt(2);
+				var b = color.charAt(3);
+				r += r;
+				g += g;
+				b += b;
+			} else {
+				r = color.substr(1, 2);
+				g = color.substr(3, 2);
+				b = color.substr(5, 2);
+			}
+			r = parseInt(r, 16);
+			g = parseInt(g, 16);
+			b = parseInt(b, 16);
+			if (r + g + b > 256 / 2 * 3) {
+				is_dark = false
+			}
+		}
+		if (is_dark) {
+			return "light"
+		} else {
+			return "dark"
+		}
+	},
+	_readURL: function(input, cb, responNode) {
+		var file
+		if (input.files && (file = input.files[0])) {
+			var type = file.type;
+			var reader = new FileReader();
+			responNode && responNode.setAttribute("loading", true);
+			reader.onload = function(e) {
+				responNode && responNode.setAttribute("loading", false);
+				var blob = new Blob([e.target.result], {
+					type: type
+				});
+				cb(URL.createObjectURL(blob));
+			}
+			reader.readAsArrayBuffer(file);
+		}
+	},
+	_selectImageFile:function (e) {
+		var self =this;
+		self._readURL(e.target,function(url) {
+			self.set("qrcode_config.image", url);
+		});
+		e.stopPropagation();
+	},
+	_isShowLabelConfig: function(model) {
+		return model == 1 || model == 2;
+	},
+	_isShowImageConfig: function(model) {
+		return model == 3 || model == 4;
+	},
+	updateQrCode:function () {
+		var self = this;
+		var qrcode_config = {};
+		for(var key in self.qrcode_config){
+			qrcode_config[key] = self.qrcode_config[key];
+		}
+		["minVersion", "maxVersion", "left", "top", "size", "radius", "quiet", "mode", "mSize", "mPosX", "mPosY"].forEach(function(key) {
+			qrcode_config[key] = parseFloat(qrcode_config[key]) || 0;
+		});
+		if (self._isShowImageConfig(qrcode_config.mode)) { //with image
+			if (self.qrcode_config._cache_img && self.qrcode_config._cache_img.src === qrcode_config.image) {
+				qrcode_config.image = self.qrcode_config._cache_img;
+				generate_qrcode();
+			} else {
+				var img = new Image;
+				img.src = qrcode_config.image;
+				qrcode_config.image = img;
+				img.onload = function() {
+					self.qrcode_config._cache_img = img;
+					generate_qrcode();
+				}
+			}
+		} else {
+			generate_qrcode();
+		}
+
+		function generate_qrcode() {
+			$(self.$.qrcode_canves).empty().qrcode(qrcode_config);
+		}
+	},
+	_closeAllToast: function() {
+		var self = this;
+		var toast_opened = self.get("toast_opened");
+		toast_opened = toast_opened.map(function(v) {
+			return false
+		});
+		self.set("toast_opened", toast_opened);
+	},
+	_showToast: function(id, v) {
+		var self = this;
+		var toast_opened = self.get("toast_opened");
+		toast_opened = toast_opened.map(function(v) {
+			return false
+		});
+		toast_opened[id] = v || true;
+		self.set("toast_opened", toast_opened);
+	}
+});
+	</script>
+</dom-module>

@@ -115,6 +115,9 @@
 		neon-animated-pages > :not(.iron-selected):not(.neon-animating){
 			position: static!important;
 		}*/
+		app-header-layout{
+			z-index: 102;
+		}
 	</style>
 	<template>
 		<app-route
@@ -133,7 +136,7 @@
 					</template>
 				</paper-menu>
 			</app-drawer>
-			<app-header-layout>
+			<app-header-layout has-scrolling-region>
 	    		<app-header fixed condenses effects="waterfall">
 					<!-- 窄屏：头部栏 -->
 					<app-toolbar>
