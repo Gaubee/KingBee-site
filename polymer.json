@@ -14,7 +14,10 @@
     "src/app/friends.html",
     "src/app/index.html",
     "src/app/panle.html",
-    "src/app/setting.html"
+    "src/app/setting.html",
+    "src/tool/index.html",
+    "src/tool/shorturl.html",
+    "src/tool/qrcode.html"
   ],
   "sourceGlobs": [
    "src/**/*",
