@@ -112,7 +112,7 @@
 					handle: function(long_url, cb, onprogress) {
 						var api_url = "http://www.youdob.com/short.php?url=" + decodeURIComponent(long_url);
 						var xhr = new XMLHttpRequest;
-						xhr.open("post", api_url);
+						xhr.open("get", api_url);
 						xhr.send();
 						xhr.onload = function() {
 							cb(null, xhr.responseText);
