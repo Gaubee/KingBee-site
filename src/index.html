@@ -20,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="/bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="/bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="/bower_components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="/src/kb-nav.html">
 
 <link rel="import" href="/bower_components/paper-styles/typography.html">
 
@@ -88,6 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <kb-view404 name="view404"></kb-view404>
       <kb-account name="account" route="{{subroute}}"></kb-account>
       <kb-app name="app" route="{{subroute}}"></kb-app>
+      <kb-tool name="tool" route="{{subroute}}"></kb-tool>
     </iron-pages>
   </template>
 
@@ -126,7 +128,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           "nav": "kb-nav",
           "view404": "kb-view404",
           "account": "account/index",
-          "app": "app/index"
+          "app": "app/index",
+          "tool": "tool/index"
         }[page];
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl(page_url + '.html');
