@@ -17,6 +17,10 @@
 <link rel="import" href="/bower_components/paper-item/paper-item.html">
 <link rel="import" href="/bower_components/paper-swatch-picker/paper-swatch-picker.html">
 <link rel="import" href="/bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="/bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="/bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="/bower_components/paper-styles/typography.html">
+<link rel="import" href="/bower_components/paper-styles/shadow.html">
 
 <script src="/bower_components/jquery/dist/jquery.slim.min.js"></script>
 <script src="/bower_components/jquery-qrcode/dist/jquery-qrcode.min.js"></script>
@@ -42,18 +46,49 @@
 		width: 100%;
 		box-sizing: border-box;
 	}
+	#qrcode-config>.card-content>paper-card{
+		margin-bottom: 2%;
+		width: 100%;
+	}
 
-	#qrcode-config paper-dropdown-menu,#qrcode-config paper-input,#qrcode-config polymer-color-picker{
+	#qrcode-config paper-dropdown-menu,#qrcode-config paper-input,#qrcode-config polymer-color-picker,#qrcode-config .input-item{
 		width: 47.5%;
 		margin-right: 2%;
 		display: inline-block;
+		position: relative;
+	}
+	#qrcode-config .input-item>paper-dropdown-menu,#qrcode-config .input-item>paper-input,#qrcode-config .input-item>paper-color-picker{
+		width: 100%;
+		margin-right: 0;
+		display: block;
+	}
+	#qrcode-config .big{
+		width: 97%;
+	}
+	#qrcode-config .small-1-3{
+		width: 30.9%;
+	}
+	#qrcode-config  paper-tabs {
+		--paper-tabs-selection-bar-color:  #4285f4;
+	}
+	#qrcode-config .paper-font-body1 {
+		@apply(--paper-font-body1);
 	}
 	#qrcode-view{
 		width: 50%;
 	}
-	#qrcode_canves{
+	#qrcode-view > .card-content{
 		text-align: center;
 		background-color: #ddd;
+	}
+	#qrcode-view > .card-content{
+	}
+	#qrcode-view > .card-content canvas{
+		/*box-shadow: 2px 2px 4px #000;*/
+		@apply(--shadow-elevation-8dp);
+	}
+	#qrcode-view > .card-content canvas:hover{
+		@apply(--shadow-elevation-12dp);
 	}
 	paper-input paper-swatch-picker{
 		width: 24px;
@@ -99,92 +134,139 @@
 		height: 100%;
 		opacity: 0;
 	}
+	.tooltip-for-input{
+		top:52px!important;
+	}
 </style>
 	<template>
 	<div class="app-container">
 		<paper-card id="qrcode-config" heading="参数配置">
 			<div class="card-content">
-				<paper-dropdown-menu label="minVersion">
-					<paper-listbox class="dropdown-content" selected="{{qrcode_config.minVersion}}" attr-for-selected="name">
-						<template is="dom-repeat" items="{{_getSelectAbleRange(1, qrcode_config.maxVersion, 0)}}">
-							<paper-item name=[[item]]>[[item]]</paper-item>
+				<paper-card heading="基础配置">
+					<div class="card-content">
+						<paper-input class="big" label="text" value="{{qrcode_config.text::input}}"></paper-input>
+						<paper-dropdown-menu label="mode" vertical-align="bottom" >
+							<paper-listbox class="dropdown-content" selected="{{qrcode_config.mode}}" attr-for-selected="name">
+								<paper-item name="0">normal</paper-item>
+								<paper-item name="1">label strip</paper-item>
+								<paper-item name="2">label box</paper-item>
+								<paper-item name="3">image strip</paper-item>
+								<paper-item name="4">image box</paper-item>
+							</paper-listbox>
+						</paper-dropdown-menu>
+						<template is="dom-if" if="{{_isShowImageConfig(qrcode_config.mode)}}">
+							<paper-input type="number" label="mSize" step="0.05" value="{{qrcode_config.mSize::input}}"></paper-input>
+							<paper-input type="number" label="mPosX" step="0.01" value="{{qrcode_config.mPosX::input}}"></paper-input>
+							<paper-input type="number" label="mPosY" step="0.01" value="{{qrcode_config.mPosY::input}}"></paper-input>
+							<paper-input class="big" label="image"  value="{{qrcode_config.image::change}}">
+								<div suffix class="select-image">
+									<iron-icon icon="image:photo">
+									</iron-icon>
+									<paper-ripple>
+									</paper-ripple>
+									<input class="select-image-mask" type="file" on-change="_selectImageFile">
+								</div>
+							</paper-input>
 						</template>
-					</paper-listbox>
-				</paper-dropdown-menu>
-				<paper-dropdown-menu label="maxVersion">
-					<paper-listbox class="dropdown-content" selected="{{qrcode_config.maxVersion}}" attr-for-selected="name">
-						<template is="dom-repeat" items="{{_getSelectAbleRange(qrcode_config.minVersion, 40, 1)}}">
-							<paper-item name=[[item]]>[[item]]</paper-item>
+						<template is="dom-if" if="{{_isShowLabelConfig(qrcode_config.mode)}}">
+							<paper-input label="fontcolor" value="{{qrcode_config.fontcolor::input}}">
+								<template is="dom-if" if="{{!qrcode_config.fontcolor}}">
+									<span prefix>#RGB:　</span>
+								</template>
+								<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fontcolor)}}" suffix></div>
+								<paper-swatch-picker suffix color="{{qrcode_config.fontcolor}}"></paper-swatch-picker>
+							</paper-input>
+							<paper-input class="big" label="label" value="{{qrcode_config.label::input}}"></paper-input>
 						</template>
-					</paper-listbox>
-				</paper-dropdown-menu>
-				<paper-dropdown-menu label="ecLevel">
-					<paper-listbox class="dropdown-content" selected="{{qrcode_config.ecLevel}}" attr-for-selected="name">
-						<paper-item name="L">低</paper-item>
-						<paper-item name="M">中</paper-item>
-						<paper-item name="Q">高</paper-item>
-						<paper-item name="H">极高</paper-item>
-					</paper-listbox>
-				</paper-dropdown-menu>
-				<paper-input type="number" label="left" value="{{qrcode_config.left::input}}"></paper-input>
-				<paper-input type="number" label="top" value="{{qrcode_config.top::input}}"></paper-input>
-				<paper-input type="number" label="size" value="{{qrcode_config.size::input}}"></paper-input>
-				<paper-input label="fill" value="{{qrcode_config.fill::input}}">
-					<template is="dom-if" if="{{!qrcode_config.fill}}">
-						<span prefix>#RGB:　</span>
-					</template>
-					<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fill)}}" suffix></div>
-					<paper-swatch-picker suffix color="{{qrcode_config.fill}}"></paper-swatch-picker>
-				</paper-input>
-				<paper-input label="background" value="{{qrcode_config.background::input}}">
-					<template is="dom-if" if="{{!qrcode_config.background}}">
-						<span prefix>#RGB:　</span>
-					</template>
-					<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.background)}}" suffix></div>
-					<paper-swatch-picker suffix color="{{qrcode_config.background}}"></paper-swatch-picker>
-				</paper-input>
-				<paper-input label="text" value="{{qrcode_config.text::input}}"></paper-input>
-				<paper-input type="number" label="radius" min="0" max="0.5" step="0.02" value="{{qrcode_config.radius::input}}"></paper-input>
-				<paper-input type="number" label="quiet" value="{{qrcode_config.quiet::input}}"></paper-input>
-				<!-- <paper-input type="number" label="mode" value="{{qrcode_config.mode::input}}"></paper-input> -->
-				<paper-dropdown-menu label="mode" vertical-align="bottom" >
-					<paper-listbox class="dropdown-content" selected="{{qrcode_config.mode}}" attr-for-selected="name">
-						<paper-item name="0">normal</paper-item>
-						<paper-item name="1">label strip</paper-item>
-						<paper-item name="2">label box</paper-item>
-						<paper-item name="3">image strip</paper-item>
-						<paper-item name="4">image box</paper-item>
-					</paper-listbox>
-				</paper-dropdown-menu>
-				<template is="dom-if" if="{{_isShowImageConfig(qrcode_config.mode)}}">
-					<paper-input type="number" label="mSize" step="0.05" value="{{qrcode_config.mSize::input}}"></paper-input>
-					<paper-input type="number" label="mPosX" step="0.01" value="{{qrcode_config.mPosX::input}}"></paper-input>
-					<paper-input type="number" label="mPosY" step="0.01" value="{{qrcode_config.mPosY::input}}"></paper-input>
-					<paper-input label="image"  value="{{qrcode_config.image::change}}">
-						<div suffix class="select-image">
-							<iron-icon icon="image:photo">
-							</iron-icon>
-							<paper-ripple>
-							</paper-ripple>
-							<input class="select-image-mask" type="file" on-change="_selectImageFile">
+					</div>
+				</paper-card>
+				<paper-card heading="颜色样式、圆角码元">
+					<div class="card-content">
+						<div class="input-item">
+							<paper-input label="fill" value="{{qrcode_config.fill::input}}">
+								<template is="dom-if" if="{{!qrcode_config.fill}}">
+									<span prefix>#RGB:　</span>
+								</template>
+								<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fill)}}" suffix></div>
+								<paper-swatch-picker suffix color="{{qrcode_config.fill}}"></paper-swatch-picker>
+							</paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>码元颜色</paper-tooltip>
 						</div>
-					</paper-input>
-				</template>
-				<template is="dom-if" if="{{_isShowLabelConfig(qrcode_config.mode)}}">
-					<paper-input label="label" value="{{qrcode_config.label::input}}"></paper-input>
-					<paper-input label="fontcolor" value="{{qrcode_config.fontcolor::input}}">
-						<template is="dom-if" if="{{!qrcode_config.fontcolor}}">
-							<span prefix>#RGB:　</span>
-						</template>
-						<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fontcolor)}}" suffix></div>
-						<paper-swatch-picker suffix color="{{qrcode_config.fontcolor}}"></paper-swatch-picker>
-					</paper-input>
-				</template>
+						<div class="input-item">
+							<paper-input label="background" value="{{qrcode_config.background::input}}">
+								<template is="dom-if" if="{{!qrcode_config.background}}">
+									<span prefix>#RGB:　</span>
+								</template>
+								<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.background)}}" suffix></div>
+								<paper-swatch-picker suffix color="{{qrcode_config.background}}"></paper-swatch-picker>
+							</paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>背景颜色，滞空则使用透明背景</paper-tooltip>
+						</div>
+						<div class="input-item">
+							<paper-input type="number" label="radius" min="0" max="0.5" step="0.02" value="{{qrcode_config.radius::input}}"></paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>0 ~ 0.5，0代表正方形，0.5代表原型</paper-tooltip>
+						</div>
+					</div>
+				</paper-card>
+				<paper-card heading="偏移、尺寸、留白">
+					<div class="card-content">
+						<div class="input-item">
+							<paper-input type="number" label="left" value="{{qrcode_config.left::input}}"></paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>距离左边的相对位移</paper-tooltip>
+						</div>
+						<div class="input-item">
+							<paper-input type="number" label="top" value="{{qrcode_config.top::input}}"></paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>距离上边的相对位移</paper-tooltip>
+						</div>
+						<div class="input-item">
+							<paper-input type="number" label="size" value="{{qrcode_config.size::input}}"></paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>图像大小</paper-tooltip>
+						</div>
+						<div class="input-item">
+							<paper-input type="number" label="quiet" value="{{qrcode_config.quiet::input}}"></paper-input>
+							<paper-tooltip class="tooltip-for-input" animation-delay=0>留白边距</paper-tooltip>
+						</div>
+					</div>
+				</paper-card>
+				<paper-card heading="高级：纠错能力">
+					<div class="card-content">
+						<paper-dropdown-menu label="minVersion">
+							<paper-listbox class="dropdown-content" selected="{{qrcode_config.minVersion}}" attr-for-selected="name">
+								<template is="dom-repeat" items="{{_getSelectAbleRange(1, qrcode_config.maxVersion, 0)}}">
+									<paper-item name=[[item]]>[[item]]</paper-item>
+								</template>
+							</paper-listbox>
+						</paper-dropdown-menu>
+						<paper-dropdown-menu label="maxVersion">
+							<paper-listbox class="dropdown-content" selected="{{qrcode_config.maxVersion}}" attr-for-selected="name">
+								<template is="dom-repeat" items="{{_getSelectAbleRange(qrcode_config.minVersion, 40, 1)}}">
+									<paper-item name=[[item]]>[[item]]</paper-item>
+								</template>
+							</paper-listbox>
+						</paper-dropdown-menu>
+						<paper-dropdown-menu class="big" label="ecLevel">
+							<paper-tabs class="dropdown-content" selected="{{qrcode_config.ecLevel}}" attr-for-selected="name">
+								<paper-tab name="L">低</paper-tab>
+								<paper-tab name="M">中</paper-tab>
+								<paper-tab name="Q">高</paper-tab>
+								<paper-tab name="H">极高</paper-tab>
+							</paper-tabs>
+						</paper-dropdown-menu>
+					</div>
+					<div class="card-actions">
+						<p id="min-max-version" class="paper-font-body1">详情查看链接：<a target="_blank" href="http://www.qrcode.com/zh/about/version.html">QR码的信息量和版本</a></p>
+						<paper-tooltip for="min-max-version" position="top" animation-delay="0">
+							<p>QR码设有1到40的不同版本（种类)，每个版本都具备固有的码元结构(码元数)。（码元是指构成QR码的方形黑白点。)</p>
+							<p>QR码的各个版本结合数据量、字符类型和纠错级别，均设有相对应的最多输入字符数。也就是说，如果增加数据量，则需要使用更多的码元来组成QR码，QR码就会变得更大。</p>
+						</paper-tooltip>
+					</div>
+				</paper-card>
 			</div>
 		</paper-card>
 		<paper-card id="qrcode-view" heading="实时效果">
-			<div id="qrcode_canves" class="card-content">
-				
+			<div class="card-content">
+				<!-- style$="width:{{qrcode_config.size}}px;height:{{qrcode_config.size}}px;" -->
+				<canvas width="{{qrcode_config.size}}" height="{{qrcode_config.size}}" id="qrcode_canves"></canvas>
 			</div>
 		</paper-card>
 	</div>
@@ -349,7 +431,10 @@ Polymer({
 		}
 
 		function generate_qrcode() {
-			$(self.$.qrcode_canves).empty().qrcode(qrcode_config);
+			var canvas = self.$.qrcode_canves;
+			var ctx = canvas.getContext("2d");
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			$(canvas).qrcode(qrcode_config);
 		}
 	},
 	_closeAllToast: function() {
