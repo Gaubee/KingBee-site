@@ -154,19 +154,13 @@
 								<paper-item name="4">image box</paper-item>
 							</paper-listbox>
 						</paper-dropdown-menu>
-						<template is="dom-if" if="{{_isShowImageConfig(qrcode_config.mode)}}">
-							<paper-input type="number" label="mSize" step="0.05" value="{{qrcode_config.mSize::input}}"></paper-input>
+						<template is="dom-if" if="{{_isNoNormalConfig(qrcode_config.mode)}}">
+							<div class="input-item">
+								<paper-input type="number" label="mSize" step="0.05" value="{{qrcode_config.mSize::input}}"></paper-input>
+								<paper-tooltip class="tooltip-for-input" animation-delay=0>小于0时，作为背景显示</paper-tooltip>
+							</div>
 							<paper-input type="number" label="mPosX" step="0.01" value="{{qrcode_config.mPosX::input}}"></paper-input>
 							<paper-input type="number" label="mPosY" step="0.01" value="{{qrcode_config.mPosY::input}}"></paper-input>
-							<paper-input class="big" label="image"  value="{{qrcode_config.image::change}}">
-								<div suffix class="select-image">
-									<iron-icon icon="image:photo">
-									</iron-icon>
-									<paper-ripple>
-									</paper-ripple>
-									<input class="select-image-mask" type="file" on-change="_selectImageFile">
-								</div>
-							</paper-input>
 						</template>
 						<template is="dom-if" if="{{_isShowLabelConfig(qrcode_config.mode)}}">
 							<paper-input label="fontcolor" value="{{qrcode_config.fontcolor::input}}">
@@ -176,7 +170,18 @@
 								<div class$="paper-swatch-picker-bg {{_DarkOrLight(qrcode_config.fontcolor)}}" suffix></div>
 								<paper-swatch-picker suffix color="{{qrcode_config.fontcolor}}"></paper-swatch-picker>
 							</paper-input>
-							<paper-input class="big" label="label" value="{{qrcode_config.label::input}}"></paper-input>
+							<paper-input label="label" value="{{qrcode_config.label::input}}"></paper-input>
+						</template>
+						<template is="dom-if" if="{{_isShowImageConfig(qrcode_config.mode)}}">
+							<paper-input class="big" label="image"  value="{{qrcode_config.image::change}}">
+								<div suffix class="select-image">
+									<iron-icon icon="image:photo">
+									</iron-icon>
+									<paper-ripple>
+									</paper-ripple>
+									<input class="select-image-mask" type="file" on-change="_selectImageFile">
+								</div>
+							</paper-input>
 						</template>
 					</div>
 				</paper-card>
@@ -397,6 +402,9 @@ Polymer({
 			self.set("qrcode_config.image", url);
 		});
 		e.stopPropagation();
+	},
+	_isNoNormalConfig:function (model) {
+		return model != 0;
 	},
 	_isShowLabelConfig: function(model) {
 		return model == 1 || model == 2;
